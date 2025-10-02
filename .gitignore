@@ -1,0 +1,54 @@
+# Node.js
+node_modules/
+dist/
+build/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Dependency directories
+/.pnp
+.pnp.js
+
+# TypeScript cache and output
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Optional npm cache directory
+.npm
+
+# IDE and editor files
+.idea/
+.vscode/
+.DS_Store
+
+# MacOS
+.DS_Store
+
+# Coverage directory
+coverage/
+*.lcov
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.swp
+*.bak
+*~
+# Ignore compiled JavaScript files if they’re not in a specific output directory
+*.js
+*.js.map
+*.d.ts
+
+# Jest
+jest-output/
