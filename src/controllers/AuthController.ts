@@ -203,6 +203,34 @@ class AuthController {
       .json(new ApiResponse(200, {}, "Password reset email sent"));
   });
 
+  resetPassword = asyncHandler(async (req: Request, res: Response) => {
+    const { resetToken, password } = req.body;
+
+    const resetPasswordToken = createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+
+    const user = await User.findOne({
+      resetPasswordToken,
+      resetPasswordExpire: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      throw new ApiError(400, "Invalid reset token");
+    }
+
+    const hashedPassword: string = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+
+    await user.save();
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, {}, "Password reset successfully"));
+  });
+
   authenticate = asyncHandler(async (req: CustomRequest, res: Response) => {
     res.json({ message: "This is a protected route", user: req.user });
   });
