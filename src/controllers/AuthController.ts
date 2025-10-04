@@ -62,7 +62,7 @@ class AuthController {
           { id: user._id, role: user.role },
           accessTokenSecret,
           {
-            expiresIn: "1m",
+            expiresIn: "15m",
           }
         );
         const refreshToken = jwt.sign({ id: user._id }, refreshTokenSecret, {
@@ -145,7 +145,7 @@ class AuthController {
       { id: user._id, role: user.role },
       accessTokenSecret,
       {
-        expiresIn: "1m",
+        expiresIn: "15m",
       }
     );
     const newRefreshToken = jwt.sign({ id: user._id }, refreshTokenSecret, {
@@ -229,6 +229,44 @@ class AuthController {
     return res
       .status(200)
       .json(new ApiResponse(200, {}, "Password reset successfully"));
+  });
+
+  changePassword = asyncHandler(async (req: CustomRequest, res: Response) => {
+    const userId = req?.user?.id;
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new ApiError(STATUS_CODES.NOT_FOUND, "User does not exist");
+    }
+    const { currentPassword, newPassword } = req.body;
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+
+    if (!isMatch) {
+      throw new ApiError(
+        STATUS_CODES.BAD_REQUEST,
+        "Current Password is not correct"
+      );
+    }
+
+    // 🔒 Hash and update new password
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedNewPassword;
+
+    // 🚫 Invalidate all existing refresh tokens (logout from all devices)
+    user.refreshToken = undefined;
+
+    await user.save();
+
+    // 🧹 Also clear tokens from cookies
+    res.clearCookie("accessToken").clearCookie("refreshToken");
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          {},
+          "Password changed successfully. Please login again."
+        )
+      );
   });
 
   authenticate = asyncHandler(async (req: CustomRequest, res: Response) => {

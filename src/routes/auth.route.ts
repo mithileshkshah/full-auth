@@ -2,7 +2,10 @@ import express, { Router } from "express";
 import AuthController from "../controllers/AuthController";
 import verifyToken from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validateRequest";
-import { resetPasswordSchema } from "../validators/authValidator";
+import {
+  changePasswordSchema,
+  resetPasswordSchema,
+} from "../validators/authValidator";
 
 const authRouter: Router = express.Router();
 
@@ -15,6 +18,12 @@ authRouter.post(
   "/reset-password",
   validate(resetPasswordSchema),
   AuthController.resetPassword
+);
+authRouter.post(
+  "/change-password",
+  validate(changePasswordSchema),
+  verifyToken,
+  AuthController.changePassword
 );
 authRouter.get("/authenticate", verifyToken, AuthController.authenticate);
 
