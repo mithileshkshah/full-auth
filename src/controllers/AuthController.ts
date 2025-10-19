@@ -45,6 +45,27 @@ class AuthController {
       );
   });
 
+  usernameExist = asyncHandler(async (req: Request, res: Response) => {
+    const { username } = req.params;
+    const user = await User.findOne({ username });
+
+    if (user) {
+      // username already exists → still 200, just mark exist: true
+      res.status(200).json({
+        success: true,
+        data: { exist: true },
+        message: "Username already exists. Please try another username",
+      });
+    } else {
+      // username available
+      res.status(200).json({
+        success: true,
+        data: { exist: false },
+        message: "Username is available",
+      });
+    }
+  });
+
   login = asyncHandler(async (req: Request, res: Response) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
